@@ -31,14 +31,13 @@ Personal portfolio for Leon Brahams (LBSi UK). Five views: Home, About, Projects
 Black, `border-top: 1px solid #262626`, flex space-between. Left (one line): "© Leon Brahams / LBSi UK 2023–2026. Images © Leon Brahams / LBSi UK unless stated otherwise." Right: "NW London" with `border-left: 1px solid #262626`. Both 0.78rem `#8a8a8a`, padding `1.4rem 2rem`, letter-spacing 0.05em.
 
 ### Section header pattern (About / Projects / Blogs / Contact)
-- Small mono label (0.7rem, letter-spacing 0.2em, uppercase, `#8a8a8a`): "About", "Work", "Writing", "Say hello".
 - H2 in Roman, `clamp(2.2rem, 5vw, 3.8rem)`, line-height 1.08, padding-bottom 2rem, bottom border.
 - Section padding `4rem 0 5rem`.
 
 ## Screens
 ### Home
 1. Hero: 2-col grid `minmax(0,1fr) minmax(0,360px)`, border on left/right/bottom.
-   - Left (padding `4rem 2.5rem`, vertically centred, right border): mono label "Home", H1 "Welcome to LBSi UK" (Roman, `clamp(2rem,4.4vw,3.6rem)`, lh 1.05), two paragraphs (1.05rem, `#8a8a8a`, lh 1.75, max-width 600px).
+   - Left (padding `4rem 2.5rem`, vertically centred, right border): H1 "Welcome to LBSi UK" (Roman, `clamp(2rem,4.4vw,3.6rem)`, lh 1.05), two paragraphs (1.05rem, `#8a8a8a`, lh 1.75, max-width 600px).
    - Right: `images/hero.png` at **3:4 aspect**, `object-fit: cover`, `grayscale(1)`; below it a full-width "SEE ALL PROJECTS →" button (`#f0f0f0` bg, black text, 0.78rem 600, letter-spacing 0.14em, padding `1.3rem 1.5rem`) → Projects.
 2. "Public facing work": H2 Roman 1.5rem with bottom border; grid `repeat(auto-fill, minmax(280px,1fr))`, gap 0, cells share borders (grid has left+top border, each card right+bottom).
    Card: image area 150px (bg image cover, left-center for Onward; hatched placeholder when none) → body padding 1.5rem (Roman 1.2rem title, 0.875rem `#8a8a8a` desc, tags) → sweep link row "VIEW PROJECT →".
