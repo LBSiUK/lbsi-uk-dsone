@@ -43,9 +43,15 @@ body { overflow-x: clip; }
 .nav-gh:hover { background: #ffffff; color: #000000; }
 .nav-gh svg { width: 9px; height: 9px; fill: none; stroke: currentColor; stroke-width: 1.4; transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); }
 .nav-gh:hover svg { transform: translate(2px, -2px); }
-.album-grid { columns: 3 300px; column-gap: 0; border-left: 1px solid #262626; border-top: 1px solid #262626; }
-.photo-tile { position: relative; margin: 0; break-inside: avoid; overflow: hidden; border-right: 1px solid #262626; border-bottom: 1px solid #262626; }
-.photo-tile picture, .photo-tile img { display: block; width: 100%; height: auto; }
+.album-wrap { container-type: inline-size; border-left: 1px solid #262626; border-top: 1px solid #262626; }
+/* Fixed 4:3 cells sized from the container width, so the layout is set before any image loads.
+   Portrait photos span two cells. */
+.album-grid { --cols: 3; display: grid; grid-template-columns: repeat(var(--cols), minmax(0, 1fr)); grid-auto-rows: calc(100cqw / var(--cols) * 0.75); grid-auto-flow: dense; }
+@container (max-width: 900px) { .album-grid { --cols: 2; } }
+@container (max-width: 560px) { .album-grid { --cols: 1; } }
+.photo-tile { position: relative; margin: 0; overflow: hidden; border-right: 1px solid #262626; border-bottom: 1px solid #262626; background: #0e0e0e; }
+.photo-tile.is-tall { grid-row: span 2; }
+.photo-tile picture, .photo-tile img { display: block; width: 100%; height: 100%; object-fit: cover; }
 /* Opening sequence. The root carries data-intro = wait | play | done: animations sit paused
    on their first frame while the first photos load, play once, then are removed. */
 @keyframes intro-drop { from { transform: translateY(-100%); opacity: 0; } }
@@ -234,9 +240,9 @@ body { overflow-x: clip; }
           </div>
         </sc-if>
         <sc-if value="{{ node.hasPhotos }}" hint-placeholder-val="{{ false }}">
-          <div class="album-grid">
+          <div class="album-wrap"><div class="album-grid">
             <sc-for list="{{ node.photos }}" as="ph" hint-placeholder-count="6">
-              <figure class="photo-tile" data-reveal="1">
+              <figure class="{{ ph.tileClass }}" data-reveal="1">
                 <picture>
                   <source srcset="{{ ph.webp }}" type="image/webp"></source>
                   <img src="{{ ph.jpg }}" alt="{{ ph.alt }}" width="{{ ph.w }}" height="1000" loading="lazy" decoding="async"></img>
@@ -251,7 +257,7 @@ body { overflow-x: clip; }
                 </figcaption>
               </figure>
             </sc-for>
-          </div>
+          </div></div>
         </sc-if>
         <sc-if value="{{ node.empty }}" hint-placeholder-val="{{ false }}">
           <p data-reveal="1" style="padding: 3rem 1.5rem; border: 1px solid #262626; color: #8a8a8a; font-size: 1.05rem;">Nothing here yet &mdash; check back soon.</p>
@@ -577,7 +583,7 @@ class Component extends DCLogic {
       trail: chain.slice(0, -1).map((n, depth) => ({ title: n.title, go: goPath(path.slice(0, depth)) })),
       hasChildren: !!cur.children, hasPhotos: !!(cur.photos && cur.photos.length), empty: photoCount(cur) === 0 && !cur.children,
       listTop: path.length ? '1px solid #262626' : '0',
-      photos: cur.photos || [],
+      photos: (cur.photos || []).map((ph) => ({ ...ph, tileClass: ph.w < 1000 ? 'photo-tile is-tall' : 'photo-tile' })),
       children: (cur.children || []).map((c, i) => {
         const f = firstPhoto(c);
         return { title: c.title, label: describe(c), open: goPath([...path, i]),
