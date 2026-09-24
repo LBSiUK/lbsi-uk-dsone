@@ -65,6 +65,12 @@ body { overflow-x: clip; }
 .lb-close { position: absolute; top: 1.25rem; right: 1.25rem; width: 44px; height: 44px; }
 .lb-close svg { width: 20px; height: 20px; }
 @media (max-width: 600px) { .lb-nav { width: 40px; } .lb-figure img { max-height: calc(100vh - 13rem); } }
+/* Photos drill-down: the new level slides over the old one, which darkens; reversed going back. */
+.photos-viewport { position: relative; overflow: hidden; }
+.photos-stage { position: relative; background: #000000; }
+.photos-snap { position: absolute; top: 0; left: 0; width: 100%; background: #000000; pointer-events: none; }
+.photos-shade { position: absolute; inset: 0; background: rgba(0, 0, 0, 0.72); pointer-events: none; }
+.is-sliding .page-title { animation: none; }
 .album-wrap { container-type: inline-size; border-left: 1px solid #262626; border-top: 1px solid #262626; }
 /* Fixed 4:3 cells sized from the container width, so the layout is set before any image loads.
    Portrait photos span two cells. */
@@ -232,62 +238,66 @@ body { overflow-x: clip; }
     <sc-if value="{{ isPhotos }}" hint-placeholder-val="{{ false }}">
       <section style="padding: 4rem 0 5rem;">
         <h2 class="page-title" style="font-family: 'Roman', serif; font-weight: normal; font-size: clamp(2.2rem, 5vw, 3.8rem); line-height: 1.08; padding-bottom: 2rem; border-bottom: 1px solid #262626;">Photos</h2>
-        <sc-if value="{{ node.isRoot }}" hint-placeholder-val="{{ true }}">
-          <p class="page-title" style="max-width: 680px; padding: 2rem 0; font-size: 1.05rem; line-height: 1.75; color: #8a8a8a; text-wrap: pretty;">I take photos across a variety of devices and of a variety of subjects. I&rsquo;m not professional or even good (by basically any standard) so don&rsquo;t expect too much here. They&rsquo;re mostly just for my personal enjoyment and documentation.</p>
-        </sc-if>
-        <sc-if value="{{ node.isChild }}" hint-placeholder-val="{{ false }}">
-          <div style="display: flex; align-items: stretch; border: 1px solid #262626; border-top: 0;">
-            <a href="#" onClick="{{ node.back }}" data-sweep="1" style="display: flex; align-items: center; padding: 1rem 1.5rem; border-right: 1px solid #262626; font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; font-weight: 600; white-space: nowrap; color: #f0f0f0; background-color: transparent; background-image: linear-gradient(#f0f0f0, #f0f0f0); background-repeat: no-repeat; background-size: 0% 100%; background-position: right center; transition: background-size 0.38s cubic-bezier(0.76, 0, 0.24, 1), color 0.25s ease;">&larr; Back</a>
-            <span style="display: flex; align-items: center; flex-wrap: wrap; gap: 0.2rem 0.6rem; padding: 1rem 1.5rem; font-size: 0.85rem; color: #8a8a8a; min-width: 0;">
-              <sc-for list="{{ node.trail }}" as="cr" hint-placeholder-count="2">
-                <a href="#" onClick="{{ cr.go }}" style="color: #8a8a8a; text-decoration: underline; text-underline-offset: 3px;" style-hover="color: #f0f0f0;">{{ cr.title }}</a><span style="color: #555555;">/</span>
+        <div class="photos-viewport">
+          <div class="photos-stage" ref="{{ photoStageRef }}">
+          <sc-if value="{{ node.isRoot }}" hint-placeholder-val="{{ true }}">
+            <p class="page-title" style="max-width: 680px; padding: 2rem 0; font-size: 1.05rem; line-height: 1.75; color: #8a8a8a; text-wrap: pretty;">I take photos across a variety of devices and of a variety of subjects. I&rsquo;m not professional or even good (by basically any standard) so don&rsquo;t expect too much here. They&rsquo;re mostly just for my personal enjoyment and documentation.</p>
+          </sc-if>
+          <sc-if value="{{ node.isChild }}" hint-placeholder-val="{{ false }}">
+            <div style="display: flex; align-items: stretch; border: 1px solid #262626; border-top: 0;">
+              <a href="#" onClick="{{ node.back }}" data-sweep="1" style="display: flex; align-items: center; padding: 1rem 1.5rem; border-right: 1px solid #262626; font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; font-weight: 600; white-space: nowrap; color: #f0f0f0; background-color: transparent; background-image: linear-gradient(#f0f0f0, #f0f0f0); background-repeat: no-repeat; background-size: 0% 100%; background-position: right center; transition: background-size 0.38s cubic-bezier(0.76, 0, 0.24, 1), color 0.25s ease;">&larr; Back</a>
+              <span style="display: flex; align-items: center; flex-wrap: wrap; gap: 0.2rem 0.6rem; padding: 1rem 1.5rem; font-size: 0.85rem; color: #8a8a8a; min-width: 0;">
+                <sc-for list="{{ node.trail }}" as="cr" hint-placeholder-count="2">
+                  <a href="#" onClick="{{ cr.go }}" style="color: #8a8a8a; text-decoration: underline; text-underline-offset: 3px;" style-hover="color: #f0f0f0;">{{ cr.title }}</a><span style="color: #555555;">/</span>
+                </sc-for>
+                <span style="color: #f0f0f0;">{{ node.title }}</span>
+              </span>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 0.5rem 2rem; padding: 3rem 0 2rem;">
+              <h1 class="page-title" style="font-family: 'Roman', serif; font-weight: normal; font-size: clamp(2rem, 4vw, 3rem); line-height: 1.1;">{{ node.title }}</h1>
+              <span class="page-title" style="font-size: 0.95rem; color: #8a8a8a;">{{ node.label }}</span>
+            </div>
+          </sc-if>
+          <sc-if value="{{ node.hasChildren }}" hint-placeholder-val="{{ true }}">
+            <div style="display: flex; flex-direction: column; border-left: 1px solid #262626; border-right: 1px solid #262626; border-top: {{ node.listTop }};">
+              <sc-for list="{{ node.children }}" as="al" hint-placeholder-count="2">
+                <a href="#" onClick="{{ al.open }}" data-sweep="1" data-reveal="1" style="display: grid; grid-template-columns: minmax(0, 220px) minmax(0, 1fr) auto; gap: 2rem; align-items: center; padding: 1.5rem; border-bottom: 1px solid #262626; color: #f0f0f0; background-color: transparent; background-image: linear-gradient(#f0f0f0, #f0f0f0); background-repeat: no-repeat; background-size: 0% 100%; background-position: right center; transition: background-size 0.38s cubic-bezier(0.76, 0, 0.24, 1), color 0.25s ease;">
+                  <div class="sweep-img" style="aspect-ratio: 4 / 3; background-color: #0e0e0e; background-image: {{ al.bg }}; background-size: cover; background-position: center;"></div>
+                  <div style="display: flex; flex-direction: column; gap: 0.7rem;">
+                    <span style="font-family: 'Roman', serif; font-size: 1.6rem; line-height: 1.15;">{{ al.title }}</span>
+                    <span style="font-size: 0.9rem; opacity: 0.75; line-height: 1.6;">{{ al.label }}</span>
+                  </div>
+                  <span style="font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; font-weight: 600;">Open &rarr;</span>
+                </a>
               </sc-for>
-              <span style="color: #f0f0f0;">{{ node.title }}</span>
-            </span>
+            </div>
+          </sc-if>
+          <sc-if value="{{ node.hasPhotos }}" hint-placeholder-val="{{ false }}">
+            <div class="album-wrap"><div class="album-grid">
+              <sc-for list="{{ node.photos }}" as="ph" hint-placeholder-count="6">
+                <figure class="{{ ph.tileClass }}" data-reveal="1" role="button" tabindex="0" aria-label="Open photo preview" onClick="{{ ph.open }}" onKeyDown="{{ ph.openKey }}">
+                  <picture>
+                    <source srcset="{{ ph.webp }}" type="image/webp"></source>
+                    <img src="{{ ph.jpg }}" alt="{{ ph.alt }}" width="{{ ph.w }}" height="1000" loading="lazy" decoding="async"></img>
+                  </picture>
+                  <figcaption>
+                    <sc-if value="{{ ph.title }}" hint-placeholder-val="{{ true }}"><span class="roll-title">{{ ph.title }}</span></sc-if>
+                    <span class="roll-meta">
+                      <span>Taken on: {{ ph.camera }}</span>
+                      <sc-if value="{{ ph.when }}" hint-placeholder-val="{{ true }}"><span>When: {{ ph.when }}</span></sc-if>
+                      <span>Where: {{ ph.where }}</span>
+                    </span>
+                  </figcaption>
+                </figure>
+              </sc-for>
+            </div></div>
+            <p class="album-note">Images are &copy; Leon Brahams / LBSi UK. For licensing/reuse, please <a href="#" onClick="{{ goContact }}">contact me</a>.</p>
+          </sc-if>
+          <sc-if value="{{ node.empty }}" hint-placeholder-val="{{ false }}">
+            <p data-reveal="1" style="padding: 3rem 1.5rem; border: 1px solid #262626; color: #8a8a8a; font-size: 1.05rem;">Nothing here yet &mdash; check back soon.</p>
+          </sc-if>
           </div>
-          <div style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 0.5rem 2rem; padding: 3rem 0 2rem;">
-            <h1 class="page-title" style="font-family: 'Roman', serif; font-weight: normal; font-size: clamp(2rem, 4vw, 3rem); line-height: 1.1;">{{ node.title }}</h1>
-            <span class="page-title" style="font-size: 0.95rem; color: #8a8a8a;">{{ node.label }}</span>
-          </div>
-        </sc-if>
-        <sc-if value="{{ node.hasChildren }}" hint-placeholder-val="{{ true }}">
-          <div style="display: flex; flex-direction: column; border-left: 1px solid #262626; border-right: 1px solid #262626; border-top: {{ node.listTop }};">
-            <sc-for list="{{ node.children }}" as="al" hint-placeholder-count="2">
-              <a href="#" onClick="{{ al.open }}" data-sweep="1" data-reveal="1" style="display: grid; grid-template-columns: minmax(0, 220px) minmax(0, 1fr) auto; gap: 2rem; align-items: center; padding: 1.5rem; border-bottom: 1px solid #262626; color: #f0f0f0; background-color: transparent; background-image: linear-gradient(#f0f0f0, #f0f0f0); background-repeat: no-repeat; background-size: 0% 100%; background-position: right center; transition: background-size 0.38s cubic-bezier(0.76, 0, 0.24, 1), color 0.25s ease;">
-                <div class="sweep-img" style="aspect-ratio: 4 / 3; background-color: #0e0e0e; background-image: {{ al.bg }}; background-size: cover; background-position: center;"></div>
-                <div style="display: flex; flex-direction: column; gap: 0.7rem;">
-                  <span style="font-family: 'Roman', serif; font-size: 1.6rem; line-height: 1.15;">{{ al.title }}</span>
-                  <span style="font-size: 0.9rem; opacity: 0.75; line-height: 1.6;">{{ al.label }}</span>
-                </div>
-                <span style="font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; font-weight: 600;">Open &rarr;</span>
-              </a>
-            </sc-for>
-          </div>
-        </sc-if>
-        <sc-if value="{{ node.hasPhotos }}" hint-placeholder-val="{{ false }}">
-          <div class="album-wrap"><div class="album-grid">
-            <sc-for list="{{ node.photos }}" as="ph" hint-placeholder-count="6">
-              <figure class="{{ ph.tileClass }}" data-reveal="1" role="button" tabindex="0" aria-label="Open photo preview" onClick="{{ ph.open }}" onKeyDown="{{ ph.openKey }}">
-                <picture>
-                  <source srcset="{{ ph.webp }}" type="image/webp"></source>
-                  <img src="{{ ph.jpg }}" alt="{{ ph.alt }}" width="{{ ph.w }}" height="1000" loading="lazy" decoding="async"></img>
-                </picture>
-                <figcaption>
-                  <sc-if value="{{ ph.title }}" hint-placeholder-val="{{ true }}"><span class="roll-title">{{ ph.title }}</span></sc-if>
-                  <span class="roll-meta">
-                    <span>Taken on: {{ ph.camera }}</span>
-                    <sc-if value="{{ ph.when }}" hint-placeholder-val="{{ true }}"><span>When: {{ ph.when }}</span></sc-if>
-                    <span>Where: {{ ph.where }}</span>
-                  </span>
-                </figcaption>
-              </figure>
-            </sc-for>
-          </div></div>
-          <p class="album-note">Images are &copy; Leon Brahams / LBSi UK. For licensing/reuse, please <a href="#" onClick="{{ goContact }}">contact me</a>.</p>
-        </sc-if>
-        <sc-if value="{{ node.empty }}" hint-placeholder-val="{{ false }}">
-          <p data-reveal="1" style="padding: 3rem 1.5rem; border: 1px solid #262626; color: #8a8a8a; font-size: 1.05rem;">Nothing here yet &mdash; check back soon.</p>
-        </sc-if>
+        </div>
       </section>
     </sc-if>
 
@@ -426,6 +436,66 @@ class Component extends DCLogic {
     setTimeout(() => { this.setState({ page: p, post: null, path: [], lb: null, instant: true }, () => document.querySelectorAll('header [data-sweep]').forEach((n) => { const on = n.dataset.active === '1'; if (n._sw) clearTimeout(n._sw.t); n._sw = { s: 'empty', h: false }; n.style.backgroundSize = on ? '100% 100%' : '0% 100%'; n.style.backgroundPosition = 'right center'; n.style.color = on ? '#000000' : '#f0f0f0'; })); window.scrollTo(0, 0); }, 380);
     a.onfinish = () => { el.style.display = 'none'; a.cancel(); this.busy = false; this.setState({ instant: false }); };
   };
+  photoStageRef = React.createRef();
+  navigatePhotos(path) {
+    const from = this.state.path || [];
+    const dir = path.length >= from.length ? 1 : -1;
+    const stage = this.photoStageRef.current, box = stage && stage.parentNode;
+    const plain = () => { this.setState({ path, lb: null }); window.scrollTo(0, 0); };
+    if (this.sliding) return;
+    if (!stage || !stage.animate || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return plain();
+    this.sliding = true;
+    // Freeze a copy of the current level to animate against the freshly rendered one.
+    const snap = stage.cloneNode(true);
+    snap.className = 'photos-snap'; snap.removeAttribute('ref'); snap.setAttribute('aria-hidden', 'true'); snap.inert = true;
+    const shade = document.createElement('div'); shade.className = 'photos-shade';
+    const oldH = stage.offsetHeight;
+    box.appendChild(snap);
+    stage.classList.add('is-sliding');
+    window.scrollTo(0, 0);
+    this.setState({ path, lb: null }, () => {
+      stage.querySelectorAll('[data-reveal]').forEach((n) => { n.style.transition = 'none'; n.classList.add('in'); });
+      // The slide is the entrance, so headings mounted mid-slide must not replay their fade afterwards.
+      stage.querySelectorAll('.page-title').forEach((n) => { n.style.animation = 'none'; });
+      // Rows are reused between levels, so clear any hover fill carried over from the clicked row.
+      const rows = [...stage.querySelectorAll('[data-sweep]')].map((n) => {
+        const t = n.style.transition;
+        if (n._sw) clearTimeout(n._sw.t);
+        n._sw = null; n.style.transition = 'none';
+        n.style.backgroundSize = '0% 100%'; n.style.backgroundPosition = 'right center'; n.style.color = '#f0f0f0';
+        return [n, t];
+      });
+      requestAnimationFrame(() => rows.forEach(([n, t]) => { n.style.transition = t; }));
+      box.style.height = Math.max(oldH, stage.offsetHeight) + 'px';
+      const opts = { duration: 560, easing: 'cubic-bezier(0.32, 0.72, 0, 1)', fill: 'both' };
+      let anims;
+      if (dir > 0) {
+        snap.style.zIndex = 0; shade.style.zIndex = 1; stage.style.zIndex = 2;
+        box.appendChild(shade);
+        anims = [
+          stage.animate([{ transform: 'translateX(100%)' }, { transform: 'translateX(0)' }], opts),
+          snap.animate([{ transform: 'translateX(0)' }, { transform: 'translateX(-25%)' }], opts),
+          shade.animate([{ opacity: 0 }, { opacity: 1 }], opts),
+        ];
+      } else {
+        stage.style.zIndex = 0; shade.style.zIndex = 1; snap.style.zIndex = 2;
+        box.appendChild(shade);
+        anims = [
+          snap.animate([{ transform: 'translateX(0)' }, { transform: 'translateX(100%)' }], opts),
+          stage.animate([{ transform: 'translateX(-25%)' }, { transform: 'translateX(0)' }], opts),
+          shade.animate([{ opacity: 1 }, { opacity: 0 }], opts),
+        ];
+      }
+      Promise.all(anims.map((a) => a.finished)).then(() => {
+        anims.forEach((a) => a.cancel());
+        snap.remove(); shade.remove();
+        box.style.height = ''; stage.style.zIndex = '';
+        stage.classList.remove('is-sliding');
+        stage.querySelectorAll('[data-reveal]').forEach((n) => { n.style.transition = ''; });
+        this.sliding = false;
+      });
+    });
+  }
   openPreview(i) {
     clearTimeout(this.lbTimer);
     document.documentElement.style.overflow = 'hidden';
@@ -660,7 +730,7 @@ class Component extends DCLogic {
       const bits = [n.date, n.children ? plural(n.children.length, 'album') : null, k ? plural(k, 'photo') : 'Coming soon'];
       return bits.filter(Boolean).join(' \u00b7 ');
     };
-    const goPath = (path) => (e) => { e.preventDefault(); this.setState({ path, lb: null }); window.scrollTo(0, 0); };
+    const goPath = (path) => (e) => { e.preventDefault(); this.navigatePhotos(path); };
     const path = this.state.path || [];
     const chain = [tree];
     path.forEach((i) => chain.push(chain[chain.length - 1].children[i]));
@@ -718,7 +788,7 @@ class Component extends DCLogic {
       post: posts[this.state.post ?? 0],
       closePost: (e) => { e.preventDefault(); this.setState({ post: null }); window.scrollTo(0, 0); },
       sweepRef: this.sweepRef, rollRef: this.rollRef, rollPrev: this.rollPrev, rollNext: this.rollNext,
-      goHome: this.go('home'), goProjects: this.go('projects'), goContact: this.go('contact'),
+      goHome: this.go('home'), goProjects: this.go('projects'), goContact: this.go('contact'), photoStageRef: this.photoStageRef,
       lb: this.previewVals(cur.photos || []),
     };
   }
