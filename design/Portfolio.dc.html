@@ -50,10 +50,10 @@ body { overflow-x: clip; }
 
   <div ref="{{ sweepRef }}" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 200; background: #f0f0f0; pointer-events: none;"></div>
 
-  <main style="flex: 1; width: 100%; max-width: 1140px; margin: 0 auto; padding: 0 2rem;">
+  <main style="flex: 1; width: 100%; max-width: 1368px; margin: 0 auto; padding: 0 2rem;">
 
     <sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}">
-      <section class="roll" data-roll="1" onMouseEnter="{{ rollEnter }}" onMouseLeave="{{ rollLeave }}">
+      <section class="roll">
         <div class="roll-track" ref="{{ rollRef }}">
           <sc-for list="{{ heroPhotos }}" as="ph" hint-placeholder-count="8">
             <figure class="roll-item" aria-hidden="{{ ph.dupe }}">
@@ -88,7 +88,7 @@ body { overflow-x: clip; }
         <div style="display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 1px solid #262626; padding-bottom: 1rem; margin-bottom: 1.5rem;">
           <h2 style="font-family: 'Roman', serif; font-weight: normal; font-size: 1.5rem;">Public facing work</h2>
         </div>
-        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 0; border-left: 1px solid #262626; border-top: 1px solid #262626;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(max(280px, calc((100% - 1px) / 3)), 1fr)); gap: 0; border-left: 1px solid #262626; border-top: 1px solid #262626;">
           <sc-for list="{{ featured }}" as="p" hint-placeholder-count="3">
             <article style="display: flex; flex-direction: column; border-right: 1px solid #262626; border-bottom: 1px solid #262626; background: #000000;">
               <div style="height: 150px; background-color: #0e0e0e; background-image: {{ p.bg }}; background-size: {{ p.bgSize }}; background-position: left center; border-bottom: 1px solid #262626; display: flex; align-items: flex-end; padding: 0.8rem 1rem;">
@@ -134,7 +134,7 @@ body { overflow-x: clip; }
     <sc-if value="{{ isProjects }}" hint-placeholder-val="{{ false }}">
       <section style="padding: 4rem 0 5rem;">
         <h2 style="font-family: 'Roman', serif; font-weight: normal; font-size: clamp(2.2rem, 5vw, 3.8rem); line-height: 1.08; padding-bottom: 2rem; margin-bottom: 1.5rem; border-bottom: 1px solid #262626;">Projects</h2>
-        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); border-left: 1px solid #262626; border-top: 1px solid #262626;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(max(280px, calc((100% - 1px) / 3)), 1fr)); border-left: 1px solid #262626; border-top: 1px solid #262626;">
           <sc-for list="{{ projects }}" as="p" hint-placeholder-count="5">
             <article style="display: flex; flex-direction: column; border-right: 1px solid #262626; border-bottom: 1px solid #262626; background: #000000;">
               <div role="img" aria-label="{{ p.title }}" style="height: 170px; background-color: #0e0e0e; background-image: {{ p.bg }}; background-size: {{ p.bgSize }}; background-position: center; filter: {{ p.filter }}; border-bottom: 1px solid #262626; display: flex; align-items: flex-end; padding: 0.8rem 1rem;">
@@ -235,9 +235,7 @@ class Component extends DCLogic {
   order = ['home', 'about', 'projects', 'blog', 'contact'];
   sweepRef = React.createRef();
   rollRef = React.createRef();
-  roll = { x: 0, v: 0, hover: false, last: 0 };
-  rollEnter = () => { this.roll.hover = true; };
-  rollLeave = () => { this.roll.hover = false; };
+  roll = { x: 0, v: 0, last: 0 };
   // Arrow jump: glide so the next/previous photo's left edge lands on the left of the screen.
   rollJump = (dir) => (e) => {
     e && e.preventDefault();
@@ -280,7 +278,7 @@ class Component extends DCLogic {
     this.onOut = (e) => { const el = find(e); if (!el) return; const o = get(el); o.h = false; if (o.s === 'full') empty(el, o); };
     document.addEventListener('mouseover', this.onOver);
     document.addEventListener('mouseout', this.onOut);
-    // Photo roll: velocity eases towards 0 on hover and back to cruising speed on leave.
+    // Photo roll: cruises continuously; after an arrow jump the speed eases back up.
     const SPEED = 40, EASE = 2.5;
     const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const tick = (t) => {
@@ -298,8 +296,7 @@ class Component extends DCLogic {
         return;
       }
       if (still) return;
-      r.v += ((r.hover ? 0 : SPEED) - r.v) * (1 - Math.exp(-EASE * dt));
-      if (r.hover && r.v < 0.5) r.v = 0;
+      r.v += (SPEED - r.v) * (1 - Math.exp(-EASE * dt));
       const loop = el.scrollWidth / 2;
       r.x = loop ? (r.x + r.v * dt) % loop : 0;
       el.style.transform = `translate3d(${-r.x}px, 0, 0)`;
@@ -386,7 +383,7 @@ class Component extends DCLogic {
       blogIndex: this.state.post == null, blogPost: this.state.post != null,
       post: posts[this.state.post ?? 0],
       closePost: (e) => { e.preventDefault(); this.setState({ post: null }); window.scrollTo(0, 0); },
-      sweepRef: this.sweepRef, rollRef: this.rollRef, rollEnter: this.rollEnter, rollLeave: this.rollLeave, rollPrev: this.rollPrev, rollNext: this.rollNext,
+      sweepRef: this.sweepRef, rollRef: this.rollRef, rollPrev: this.rollPrev, rollNext: this.rollNext,
       goHome: this.go('home'), goProjects: this.go('projects'),
     };
   }

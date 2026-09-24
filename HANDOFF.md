@@ -17,7 +17,7 @@ Personal portfolio for Leon Brahams (LBSi UK). Five views: Home, About, Projects
 - Fill / active: `#f0f0f0` background with `#000000` text
 - Radius: **0 everywhere**. No shadows.
 - Fonts: display = `Roman` (`assets/Roman.otf`, weight normal); UI/body = `"Segoe UI", Tahoma, Geneva, Verdana, sans-serif`; labels = `ui-monospace, Menlo, monospace`
-- Content column: `max-width: 1140px; margin: 0 auto; padding: 0 2rem`
+- Content column: `max-width: 1368px; margin: 0 auto; padding: 0 2rem`
 - Easing: `cubic-bezier(0.76, 0, 0.24, 1)`
 
 ## Global layout
@@ -39,7 +39,7 @@ Black, `border-top: 1px solid #262626`, flex space-between. Left (one line): "©
 1. Hero: 2-col grid `minmax(0,1fr) minmax(0,360px)`, border on left/right/bottom.
    - Left (padding `4rem 2.5rem`, vertically centred, right border): H1 "Welcome to LBSi UK" (Roman, `clamp(2rem,4.4vw,3.6rem)`, lh 1.05), two paragraphs (1.05rem, `#8a8a8a`, lh 1.75, max-width 600px).
    - Right: `images/hero.png` at **3:4 aspect**, `object-fit: cover`, `grayscale(1)`; below it a full-width "SEE ALL PROJECTS →" button (`#f0f0f0` bg, black text, 0.78rem 600, letter-spacing 0.14em, padding `1.3rem 1.5rem`) → Projects.
-2. "Public facing work": H2 Roman 1.5rem with bottom border; grid `repeat(auto-fill, minmax(280px,1fr))`, gap 0, cells share borders (grid has left+top border, each card right+bottom).
+2. "Public facing work": H2 Roman 1.5rem with bottom border; grid `repeat(auto-fill, minmax(max(280px, calc((100% - 1px) / 3)), 1fr))`, gap 0, cells share borders (grid has left+top border, each card right+bottom).
    Card: image area 150px (bg image cover, left-center for Onward; hatched placeholder when none) → body padding 1.5rem (Roman 1.2rem title, 0.875rem `#8a8a8a` desc, tags) → sweep link row "VIEW PROJECT →".
    Cards: Onward's website (images/onward.png, → https://onward-site-v3.vercel.app), lbsi.uk, Pixelbook Go — Linux.
 
@@ -47,7 +47,7 @@ Black, `border-top: 1px solid #262626`, flex space-between. Left (one line): "©
 Grid `minmax(0,1fr) minmax(0,360px)`. Left: paragraphs (0.97rem, `#8a8a8a`, lh 1.85, key phrases `<strong>` in `#f0f0f0`), skill chips (0.74rem, padding `0.4rem 0.8rem`, border `#333`, bg `#0f0f0f`). Right: `images/leon.jpeg` 3:4, grayscale.
 
 ### Projects
-Same card grid, `minmax(300px,1fr)`, image area 170px (grayscale). Five projects (see `projects` array).
+Same card grid, `minmax(max(280px, calc((100% - 1px) / 3)), 1fr)`, image area 170px (grayscale). Five projects (see `projects` array).
 
 ### Blogs
 - Index: list rows, each a sweep link: grid `minmax(0,220px) minmax(0,1fr) auto`, gap 2rem, padding 1.5rem — 4:3 grayscale thumbnail, mono date, Roman 1.6rem title, lede, "READ →".
