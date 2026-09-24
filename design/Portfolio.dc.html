@@ -454,18 +454,19 @@ class Component extends DCLogic {
     stage.classList.add('is-sliding');
     window.scrollTo(0, 0);
     this.setState({ path, lb: null }, () => {
-      stage.querySelectorAll('[data-reveal]').forEach((n) => { n.style.transition = 'none'; n.classList.add('in'); });
+      // Freeze transitions on the incoming level while it slides, remembering each element's own
+      // inline transition (the sweep rows carry theirs in the template) so it is restored exactly.
+      const saved = new Map();
+      const hold = (n) => { if (!saved.has(n)) saved.set(n, n.style.transition); n.style.transition = 'none'; };
+      stage.querySelectorAll('[data-reveal]').forEach((n) => { hold(n); n.classList.add('in'); });
       // The slide is the entrance, so headings mounted mid-slide must not replay their fade afterwards.
       stage.querySelectorAll('.page-title').forEach((n) => { n.style.animation = 'none'; });
       // Rows are reused between levels, so clear any hover fill carried over from the clicked row.
-      const rows = [...stage.querySelectorAll('[data-sweep]')].map((n) => {
-        const t = n.style.transition;
+      stage.querySelectorAll('[data-sweep]').forEach((n) => {
         if (n._sw) clearTimeout(n._sw.t);
-        n._sw = null; n.style.transition = 'none';
+        n._sw = null; hold(n);
         n.style.backgroundSize = '0% 100%'; n.style.backgroundPosition = 'right center'; n.style.color = '#f0f0f0';
-        return [n, t];
       });
-      requestAnimationFrame(() => rows.forEach(([n, t]) => { n.style.transition = t; }));
       const newH = stage.offsetHeight;
       const opts = { duration: 560, easing: 'cubic-bezier(0.32, 0.72, 0, 1)', fill: 'both' };
       // Keep both layers composited for the whole slide so nothing re-rasterises at the end.
@@ -496,7 +497,7 @@ class Component extends DCLogic {
         snap.remove(); shade.remove();
         stage.style.zIndex = ''; stage.style.willChange = '';
         stage.classList.remove('is-sliding');
-        stage.querySelectorAll('[data-reveal]').forEach((n) => { n.style.transition = ''; });
+        saved.forEach((t, n) => { n.style.transition = t; });
         this.sliding = false;
       });
     });
