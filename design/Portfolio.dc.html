@@ -257,7 +257,7 @@ class Component extends DCLogic {
     ].map((p) => ({ ...p, noImg: !p.img, bg: p.img ? `url("${p.img}")` : 'repeating-linear-gradient(135deg, #141414 0 8px, #0e0e0e 8px 16px)', bgSize: p.img ? 'cover' : 'auto', filter: p.img ? 'grayscale(1)' : 'none' }));
     const featured = [
       { title: "Onward's website", img: 'images/onward.png', desc: 'Co-author of EV CPO (Charge Point Operator) website and maintenance. My biggest public facing project', tags: ['Web', 'Design', 'Maintenance'], href: 'https://onward-site-v3.vercel.app', cta: 'View project' },
-      { title: 'lbsi.uk', desc: 'My personal website — built from scratch with glassmorphic design, dark/light modes, and heavy animation.', tags: ['HTML', 'CSS', 'JS'], href: 'https://lbsi.uk', cta: 'View project' },
+      { title: 'lbsi.uk', desc: "DSOne here we go! You’re looking at the current incarnation of lbsi.uk. It’s not stupid complex but it’s readable and seemingly lightweight, and I like how it looks.", tags: ['JavaScript', 'HTML'], href: 'https://lbsi.uk', cta: 'View project' },
       { ...projects[1] },
     ].map((p) => ({ ...p, noImg: !p.img, bg: p.img ? `url("${p.img}")` : 'repeating-linear-gradient(135deg, #141414 0 8px, #0e0e0e 8px 16px)', bgSize: p.img ? 'cover' : 'auto' }));
     const P = (text) => ({ isP: true, text });
