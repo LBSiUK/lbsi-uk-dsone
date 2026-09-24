@@ -232,6 +232,9 @@ body { overflow-x: clip; }
     <sc-if value="{{ isPhotos }}" hint-placeholder-val="{{ false }}">
       <section style="padding: 4rem 0 5rem;">
         <h2 class="page-title" style="font-family: 'Roman', serif; font-weight: normal; font-size: clamp(2.2rem, 5vw, 3.8rem); line-height: 1.08; padding-bottom: 2rem; border-bottom: 1px solid #262626;">Photos</h2>
+        <sc-if value="{{ node.isRoot }}" hint-placeholder-val="{{ true }}">
+          <p class="page-title" style="max-width: 680px; padding: 2rem 0; font-size: 1.05rem; line-height: 1.75; color: #8a8a8a; text-wrap: pretty;">I take photos across a variety of devices and of a variety of subjects. I&rsquo;m not professional or even good (by basically any standard) so don&rsquo;t expect too much here. They&rsquo;re mostly just for my personal enjoyment and documentation.</p>
+        </sc-if>
         <sc-if value="{{ node.isChild }}" hint-placeholder-val="{{ false }}">
           <div style="display: flex; align-items: stretch; border: 1px solid #262626; border-top: 0;">
             <a href="#" onClick="{{ node.back }}" data-sweep="1" style="display: flex; align-items: center; padding: 1rem 1.5rem; border-right: 1px solid #262626; font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; font-weight: 600; white-space: nowrap; color: #f0f0f0; background-color: transparent; background-image: linear-gradient(#f0f0f0, #f0f0f0); background-repeat: no-repeat; background-size: 0% 100%; background-position: right center; transition: background-size 0.38s cubic-bezier(0.76, 0, 0.24, 1), color 0.25s ease;">&larr; Back</a>
@@ -587,23 +590,22 @@ class Component extends DCLogic {
     });
     const tree = { title: 'Photos', children: [
       { title: 'Things I take to look nice', photos },
-      { title: 'Photos from \u2018interesting\u2019 cameras', children: [
-        { title: IPOD, children: [
-      ipodAlbum('sussex-downs', 'Sussex Downs', 'April 2026', [
+      { title: 'iPod Touch 5', children: [
+        ipodAlbum('sussex-downs', 'Sussex Downs', 'April 2026', [
           ['img-0012', 1339, '23 April 2026', 'Sussex Downs, UK'],
           ['img-0013', 1339, '23 April 2026', 'Sussex Downs, UK'],
           ['img-0017', 747, '23 April 2026', 'Sussex Downs, UK'],
           ['img-0029', 1339, '23 April 2026', 'Sussex Downs, UK'],
           ['img-0126', 1339, '', 'Sussex Downs, UK'],
         ]),
-      ipodAlbum('shoreham-beach', 'Shoreham Beach', 'April 2026', [
+        ipodAlbum('shoreham-beach', 'Shoreham Beach', 'April 2026', [
           ['img-0039', 1339, '25 April 2026', 'Shoreham Beach, West Sussex, UK'],
           ['img-0049', 1339, '25 April 2026', 'Shoreham Beach, West Sussex, UK'],
           ['img-0054', 1339, '25 April 2026', 'Shoreham Beach, West Sussex, UK'],
           ['img-0058', 1339, '25 April 2026', 'Shoreham Beach, West Sussex, UK'],
           ['img-0060', 1339, '25 April 2026', 'Shoreham Beach, West Sussex, UK'],
         ]),
-      ipodAlbum('house-of-fraser', 'House of Fraser (Birmingham)', 'May 2026', [
+        ipodAlbum('house-of-fraser', 'House of Fraser (Birmingham)', 'May 2026', [
           ['img-0128', 1339, '27 May 2026', 'House of Fraser, Birmingham, UK'],
           ['img-0131', 1339, '27 May 2026', 'House of Fraser, Birmingham, UK'],
           ['img-0132', 1339, '27 May 2026', 'House of Fraser, Birmingham, UK'],
@@ -611,7 +613,7 @@ class Component extends DCLogic {
           ['img-0139', 1339, '27 May 2026', 'House of Fraser, Birmingham, UK'],
           ['img-0141', 1339, '27 May 2026', 'House of Fraser, Birmingham, UK'],
         ]),
-      ipodAlbum('malta', 'Malta', 'July 2026', [
+        ipodAlbum('malta', 'Malta', 'July 2026', [
           ['img-0153', 1339, 'July 2026', 'Malta'],
           ['img-0155', 1339, 'July 2026', 'Malta'],
           ['img-0157', 1339, 'July 2026', 'Malta'],
@@ -632,7 +634,7 @@ class Component extends DCLogic {
           ['img-0267', 1339, '27 June 2026', 'Malta'],
           ['img-0275', 1339, '29 June 2026', 'Mdina, Malta'],
         ]),
-      ipodAlbum('central-london', 'Central London', 'July 2026', [
+        ipodAlbum('central-london', 'Central London', 'July 2026', [
           ['img-0294', 1339, '4 July 2026', 'Victoria Embankment, London, UK'],
           ['img-0309', 1339, '5 July 2026', 'Leake Street Tunnel, London, UK'],
           ['img-0317', 1339, '5 July 2026', 'Leake Street Tunnel, London, UK'],
@@ -643,12 +645,11 @@ class Component extends DCLogic {
           ['img-0372', 1339, '23 July 2026', 'Shoreditch, London, UK'],
           ['img-0380', 1339, '23 July 2026', 'Shoreditch, London, UK'],
         ]),
-      ipodAlbum('brighton', 'Brighton General', 'July 2026', [
+        ipodAlbum('brighton', 'Brighton General', 'July 2026', [
           ['img-0399', 1339, '27 July 2026', 'Brighton, UK'],
           ['img-0401', 1339, '27 July 2026', 'Brighton, UK'],
           ['img-0406', 1339, '27 July 2026', 'Brighton, UK'],
         ]),
-        ] },
       ] },
     ] };
     const photoCount = (n) => (n.photos ? n.photos.length : (n.children || []).reduce((t, c) => t + photoCount(c), 0));
@@ -665,11 +666,11 @@ class Component extends DCLogic {
     path.forEach((i) => chain.push(chain[chain.length - 1].children[i]));
     const cur = chain[chain.length - 1];
     const node = {
-      title: cur.title, label: describe(cur), isChild: path.length > 0,
+      title: cur.title, label: describe(cur), isChild: path.length > 0, isRoot: path.length === 0,
       back: goPath(path.slice(0, -1)),
       trail: chain.slice(0, -1).map((n, depth) => ({ title: n.title, go: goPath(path.slice(0, depth)) })),
       hasChildren: !!cur.children, hasPhotos: !!(cur.photos && cur.photos.length), empty: photoCount(cur) === 0 && !cur.children,
-      listTop: path.length ? '1px solid #262626' : '0',
+      listTop: '1px solid #262626',
       photos: (cur.photos || []).map((ph, i) => ({ ...ph, tileClass: ph.w < 1000 ? 'photo-tile is-tall' : 'photo-tile',
         open: () => this.openPreview(i),
         openKey: (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); this.openPreview(i); } } })),
