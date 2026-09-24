@@ -43,6 +43,28 @@ body { overflow-x: clip; }
 .nav-gh:hover { background: #ffffff; color: #000000; }
 .nav-gh svg { width: 9px; height: 9px; fill: none; stroke: currentColor; stroke-width: 1.4; transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); }
 .nav-gh:hover svg { transform: translate(2px, -2px); }
+.photo-tile { cursor: zoom-in; }
+.photo-tile:focus-visible { outline: 1px solid #f0f0f0; outline-offset: -1px; }
+.album-note { padding: 1.5rem 0 0; color: #8a8a8a; font-size: 0.85rem; line-height: 1.6; }
+.album-note a { color: #f0f0f0; text-decoration: underline; text-underline-offset: 3px; }
+/* Photo preview (lightbox) */
+@keyframes lb-in { from { opacity: 0; } }
+@keyframes lb-pop { from { opacity: 0; transform: scale(0.96); } }
+.lb { position: fixed; inset: 0; z-index: 300; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; background: rgba(0, 0, 0, 0.94); animation: lb-in 0.35s ease both; transition: opacity 0.25s ease; }
+.lb.is-closing { opacity: 0; }
+.lb-figure { margin: 0; justify-self: center; display: flex; flex-direction: column; align-items: center; gap: 1.1rem; max-width: 100%; animation: lb-pop 0.45s cubic-bezier(0.2, 0.8, 0.2, 1) both; cursor: default; }
+.lb-figure img { display: block; max-width: min(100%, 1400px); max-height: calc(100vh - 11rem); width: auto; height: auto; border: 1px solid #262626; }
+.lb-cap { display: flex; flex-direction: column; align-items: center; gap: 0.45rem; text-align: center; color: #f0f0f0; }
+.lb-cap .roll-title { font-size: 1.1rem; }
+.lb-meta { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.3rem 1.4rem; font-size: 0.85rem; color: #8a8a8a; }
+.lb-btn { display: flex; align-items: center; justify-content: center; border: 0; background: transparent; color: #f0f0f0; cursor: pointer; opacity: 0.7; transition: opacity 0.25s ease; }
+.lb-btn:hover, .lb-btn:focus-visible { opacity: 1; outline: none; }
+.lb-btn svg { fill: none; stroke: currentColor; stroke-width: 1.5; }
+.lb-nav { width: clamp(56px, 8vw, 120px); height: 100%; }
+.lb-nav svg { width: 18px; height: 56px; }
+.lb-close { position: absolute; top: 1.25rem; right: 1.25rem; width: 44px; height: 44px; }
+.lb-close svg { width: 20px; height: 20px; }
+@media (max-width: 600px) { .lb-nav { width: 40px; } .lb-figure img { max-height: calc(100vh - 13rem); } }
 .album-wrap { container-type: inline-size; border-left: 1px solid #262626; border-top: 1px solid #262626; }
 /* Fixed 4:3 cells sized from the container width, so the layout is set before any image loads.
    Portrait photos span two cells. */
@@ -242,7 +264,7 @@ body { overflow-x: clip; }
         <sc-if value="{{ node.hasPhotos }}" hint-placeholder-val="{{ false }}">
           <div class="album-wrap"><div class="album-grid">
             <sc-for list="{{ node.photos }}" as="ph" hint-placeholder-count="6">
-              <figure class="{{ ph.tileClass }}" data-reveal="1">
+              <figure class="{{ ph.tileClass }}" data-reveal="1" role="button" tabindex="0" aria-label="Open photo preview" onClick="{{ ph.open }}" onKeyDown="{{ ph.openKey }}">
                 <picture>
                   <source srcset="{{ ph.webp }}" type="image/webp"></source>
                   <img src="{{ ph.jpg }}" alt="{{ ph.alt }}" width="{{ ph.w }}" height="1000" loading="lazy" decoding="async"></img>
@@ -258,6 +280,7 @@ body { overflow-x: clip; }
               </figure>
             </sc-for>
           </div></div>
+          <p class="album-note">Images are &copy; Leon Brahams / LBSi UK. For licensing/reuse, please <a href="#" onClick="{{ goContact }}">contact me</a>.</p>
         </sc-if>
         <sc-if value="{{ node.empty }}" hint-placeholder-val="{{ false }}">
           <p data-reveal="1" style="padding: 3rem 1.5rem; border: 1px solid #262626; color: #8a8a8a; font-size: 1.05rem;">Nothing here yet &mdash; check back soon.</p>
@@ -330,6 +353,29 @@ body { overflow-x: clip; }
 
   </main>
 
+  <sc-if value="{{ lb.open }}" hint-placeholder-val="{{ false }}">
+    <div class="{{ lb.cls }}" role="dialog" aria-modal="true" aria-label="Photo preview" onClick="{{ lb.close }}">
+      <button class="lb-btn lb-nav" type="button" aria-label="Previous photo" onClick="{{ lb.prev }}"><svg viewBox="0 0 18 56" aria-hidden="true"><polyline points="16,2 2,28 16,54"></polyline></svg></button>
+      <figure class="lb-figure" onClick="{{ lb.stop }}">
+        <picture>
+          <source srcset="{{ lb.photo.webp }}" type="image/webp"></source>
+          <img src="{{ lb.photo.jpg }}" alt="{{ lb.photo.alt }}"></img>
+        </picture>
+        <figcaption class="lb-cap">
+          <sc-if value="{{ lb.photo.title }}" hint-placeholder-val="{{ false }}"><span class="roll-title">{{ lb.photo.title }}</span></sc-if>
+          <span class="lb-meta">
+            <span>Taken on: {{ lb.photo.camera }}</span>
+            <sc-if value="{{ lb.photo.when }}" hint-placeholder-val="{{ true }}"><span>When: {{ lb.photo.when }}</span></sc-if>
+            <span>Where: {{ lb.photo.where }}</span>
+            <span>{{ lb.counter }}</span>
+          </span>
+        </figcaption>
+      </figure>
+      <button class="lb-btn lb-nav" type="button" aria-label="Next photo" onClick="{{ lb.next }}"><svg viewBox="0 0 18 56" aria-hidden="true"><polyline points="2,2 16,28 2,54"></polyline></svg></button>
+      <button class="lb-btn lb-close" type="button" aria-label="Close preview" onClick="{{ lb.close }}"><svg viewBox="0 0 20 20" aria-hidden="true"><line x1="2" y1="2" x2="18" y2="18"></line><line x1="18" y1="2" x2="2" y2="18"></line></svg></button>
+    </div>
+  </sc-if>
+
   <footer style="border-top: 1px solid #262626; display: flex; justify-content: space-between; align-items: stretch; background: #000000;">
     <p style="padding: 1.4rem 2rem; color: #8a8a8a; font-size: 0.78rem; letter-spacing: 0.05em;">&#169; Leon Brahams / LBSi UK 2023&#8211;2026. Images &#169; Leon Brahams / LBSi UK unless stated otherwise.</p>
     <p style="padding: 1.4rem 2rem; color: #8a8a8a; font-size: 0.78rem; letter-spacing: 0.05em; border-left: 1px solid #262626;">NW London</p>
@@ -338,7 +384,7 @@ body { overflow-x: clip; }
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props="{}">
 class Component extends DCLogic {
-  state = { page: 'home', intro: 'wait', path: [] };
+  state = { page: 'home', intro: 'wait', path: [], lb: null, lbClosing: false };
   order = ['home', 'about', 'projects', 'photos', 'blog', 'contact'];
   sweepRef = React.createRef();
   rollRef = React.createRef();
@@ -374,9 +420,24 @@ class Component extends DCLogic {
       { transform: 'translateX(0%)', offset: 0.5 },
       { transform: 'translateX(100%)' },
     ], { duration: 760, easing: 'cubic-bezier(0.76, 0, 0.24, 1)', fill: 'both' });
-    setTimeout(() => { this.setState({ page: p, post: null, path: [], instant: true }, () => document.querySelectorAll('header [data-sweep]').forEach((n) => { const on = n.dataset.active === '1'; if (n._sw) clearTimeout(n._sw.t); n._sw = { s: 'empty', h: false }; n.style.backgroundSize = on ? '100% 100%' : '0% 100%'; n.style.backgroundPosition = 'right center'; n.style.color = on ? '#000000' : '#f0f0f0'; })); window.scrollTo(0, 0); }, 380);
+    setTimeout(() => { this.setState({ page: p, post: null, path: [], lb: null, instant: true }, () => document.querySelectorAll('header [data-sweep]').forEach((n) => { const on = n.dataset.active === '1'; if (n._sw) clearTimeout(n._sw.t); n._sw = { s: 'empty', h: false }; n.style.backgroundSize = on ? '100% 100%' : '0% 100%'; n.style.backgroundPosition = 'right center'; n.style.color = on ? '#000000' : '#f0f0f0'; })); window.scrollTo(0, 0); }, 380);
     a.onfinish = () => { el.style.display = 'none'; a.cancel(); this.busy = false; this.setState({ instant: false }); };
   };
+  openPreview(i) {
+    clearTimeout(this.lbTimer);
+    document.documentElement.style.overflow = 'hidden';
+    this.setState({ lb: i, lbClosing: false });
+  }
+  closePreview() {
+    if (this.state.lb == null || this.state.lbClosing) return;
+    this.setState({ lbClosing: true });
+    this.lbTimer = setTimeout(() => { document.documentElement.style.overflow = ''; this.setState({ lb: null, lbClosing: false }); }, 250);
+  }
+  stepPreview(d) {
+    const n = this.lbCount || 0;
+    if (this.state.lb == null || !n) return;
+    this.setState({ lb: (this.state.lb + d + n) % n });
+  }
   componentDidMount() {
     const D = 380;
     const get = (el) => el._sw || (el._sw = { s: 'empty', h: false });
@@ -387,6 +448,14 @@ class Component extends DCLogic {
     this.onOut = (e) => { const el = find(e); if (!el) return; const o = get(el); o.h = false; if (o.s === 'full') empty(el, o); };
     document.addEventListener('mouseover', this.onOver);
     document.addEventListener('mouseout', this.onOut);
+    // Preview keys: Esc closes, arrows step through the album.
+    this.onKey = (e) => {
+      if (this.state.lb == null) return;
+      if (e.key === 'Escape') this.closePreview();
+      else if (e.key === 'ArrowLeft') this.stepPreview(-1);
+      else if (e.key === 'ArrowRight') this.stepPreview(1);
+    };
+    document.addEventListener('keydown', this.onKey);
     // Photo roll: cruises continuously; after an arrow jump the speed eases back up.
     const SPEED = this.ROLL_SPEED, EASE = this.ROLL_EASE;
     const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -446,9 +515,27 @@ class Component extends DCLogic {
   componentWillUnmount() {
     document.removeEventListener('mouseover', this.onOver);
     document.removeEventListener('mouseout', this.onOut);
+    document.removeEventListener('keydown', this.onKey);
+    document.documentElement.style.overflow = '';
     cancelAnimationFrame(this.rollFrame);
     clearTimeout(this.introTimer);
     this.revealer && this.revealer.disconnect();
+  }
+  previewVals(photos) {
+    this.lbCount = photos.length;
+    const i = this.state.lb;
+    if (i == null || !photos[i]) return { open: false };
+    // Warm the neighbours so stepping through feels instant.
+    [1, -1].forEach((d) => { const n = photos[(i + d + photos.length) % photos.length]; if (n) new Image().src = n.webp; });
+    const stop = (e) => e.stopPropagation();
+    return {
+      open: true, photo: photos[i], counter: `${i + 1} / ${photos.length}`,
+      cls: this.state.lbClosing ? 'lb is-closing' : 'lb',
+      close: (e) => { e && e.stopPropagation(); this.closePreview(); },
+      prev: (e) => { stop(e); this.stepPreview(-1); },
+      next: (e) => { stop(e); this.stepPreview(1); },
+      stop,
+    };
   }
   renderVals() {
     const page = this.state.page;
@@ -572,7 +659,7 @@ class Component extends DCLogic {
       const bits = [n.date, n.children ? plural(n.children.length, 'album') : null, k ? plural(k, 'photo') : 'Coming soon'];
       return bits.filter(Boolean).join(' \u00b7 ');
     };
-    const goPath = (path) => (e) => { e.preventDefault(); this.setState({ path }); window.scrollTo(0, 0); };
+    const goPath = (path) => (e) => { e.preventDefault(); this.setState({ path, lb: null }); window.scrollTo(0, 0); };
     const path = this.state.path || [];
     const chain = [tree];
     path.forEach((i) => chain.push(chain[chain.length - 1].children[i]));
@@ -583,7 +670,9 @@ class Component extends DCLogic {
       trail: chain.slice(0, -1).map((n, depth) => ({ title: n.title, go: goPath(path.slice(0, depth)) })),
       hasChildren: !!cur.children, hasPhotos: !!(cur.photos && cur.photos.length), empty: photoCount(cur) === 0 && !cur.children,
       listTop: path.length ? '1px solid #262626' : '0',
-      photos: (cur.photos || []).map((ph) => ({ ...ph, tileClass: ph.w < 1000 ? 'photo-tile is-tall' : 'photo-tile' })),
+      photos: (cur.photos || []).map((ph, i) => ({ ...ph, tileClass: ph.w < 1000 ? 'photo-tile is-tall' : 'photo-tile',
+        open: () => this.openPreview(i),
+        openKey: (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); this.openPreview(i); } } })),
       children: (cur.children || []).map((c, i) => {
         const f = firstPhoto(c);
         return { title: c.title, label: describe(c), open: goPath([...path, i]),
@@ -628,7 +717,8 @@ class Component extends DCLogic {
       post: posts[this.state.post ?? 0],
       closePost: (e) => { e.preventDefault(); this.setState({ post: null }); window.scrollTo(0, 0); },
       sweepRef: this.sweepRef, rollRef: this.rollRef, rollPrev: this.rollPrev, rollNext: this.rollNext,
-      goHome: this.go('home'), goProjects: this.go('projects'),
+      goHome: this.go('home'), goProjects: this.go('projects'), goContact: this.go('contact'),
+      lb: this.previewVals(cur.photos || []),
     };
   }
 }
