@@ -36,6 +36,9 @@ body { overflow-x: clip; }
 .roll-prev:active svg { transform: translateX(-3px); }
 .roll-next:active svg { transform: translateX(3px); }
 @media (hover: none) { .roll-nav { opacity: 1; width: 64px; padding: 0 1rem; } }
+/* Thumbnails inside sweep rows turn from black and white to colour with the hover fill. */
+.sweep-img { filter: grayscale(1); transition: filter 0.38s cubic-bezier(0.76, 0, 0.24, 1); }
+[data-sweep]:hover .sweep-img { filter: grayscale(0); }
 .album-grid { columns: 3 300px; column-gap: 0; border-left: 1px solid #262626; border-top: 1px solid #262626; }
 .photo-tile { position: relative; margin: 0; break-inside: avoid; overflow: hidden; border-right: 1px solid #262626; border-bottom: 1px solid #262626; }
 .photo-tile picture, .photo-tile img { display: block; width: 100%; height: auto; }
@@ -212,17 +215,15 @@ body { overflow-x: clip; }
           </div>
         </sc-if>
         <sc-if value="{{ node.hasChildren }}" hint-placeholder-val="{{ true }}">
-          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(max(280px, calc((100% - 1px) / {{ node.cols }})), 1fr)); border-left: 1px solid #262626; border-top: 1px solid #262626;">
+          <div style="display: flex; flex-direction: column; border-left: 1px solid #262626; border-right: 1px solid #262626; border-top: {{ node.listTop }};">
             <sc-for list="{{ node.children }}" as="al" hint-placeholder-count="2">
-              <a href="#" onClick="{{ al.open }}" data-sweep="1" data-reveal="1" style="display: flex; flex-direction: column; gap: 1.5rem; padding: 1.5rem; border-right: 1px solid #262626; border-bottom: 1px solid #262626; color: #f0f0f0; background-color: transparent; background-image: linear-gradient(#f0f0f0, #f0f0f0); background-repeat: no-repeat; background-size: 0% 100%; background-position: right center; transition: background-size 0.38s cubic-bezier(0.76, 0, 0.24, 1), color 0.25s ease;">
-                <div style="aspect-ratio: 16 / 9; background-color: #0e0e0e; background-image: {{ al.bg }}; background-size: cover; background-position: center; filter: grayscale(1);"></div>
-                <div style="display: flex; justify-content: space-between; align-items: flex-end; gap: 1.5rem;">
-                  <div style="display: flex; flex-direction: column; gap: 0.6rem;">
-                    <span style="font-family: 'Roman', serif; font-size: 1.8rem; line-height: 1.15;">{{ al.title }}</span>
-                    <span style="font-size: 0.9rem; opacity: 0.7;">{{ al.label }}</span>
-                  </div>
-                  <span style="font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; font-weight: 600; white-space: nowrap;">Open &rarr;</span>
+              <a href="#" onClick="{{ al.open }}" data-sweep="1" data-reveal="1" style="display: grid; grid-template-columns: minmax(0, 220px) minmax(0, 1fr) auto; gap: 2rem; align-items: center; padding: 1.5rem; border-bottom: 1px solid #262626; color: #f0f0f0; background-color: transparent; background-image: linear-gradient(#f0f0f0, #f0f0f0); background-repeat: no-repeat; background-size: 0% 100%; background-position: right center; transition: background-size 0.38s cubic-bezier(0.76, 0, 0.24, 1), color 0.25s ease;">
+                <div class="sweep-img" style="aspect-ratio: 4 / 3; background-color: #0e0e0e; background-image: {{ al.bg }}; background-size: cover; background-position: center;"></div>
+                <div style="display: flex; flex-direction: column; gap: 0.7rem;">
+                  <span style="font-family: 'Roman', serif; font-size: 1.6rem; line-height: 1.15;">{{ al.title }}</span>
+                  <span style="font-size: 0.9rem; opacity: 0.75; line-height: 1.6;">{{ al.label }}</span>
                 </div>
+                <span style="font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; font-weight: 600;">Open &rarr;</span>
               </a>
             </sc-for>
           </div>
@@ -260,7 +261,7 @@ body { overflow-x: clip; }
           <div data-reveal="1" style="--rd: 150ms; display: flex; flex-direction: column; border-left: 1px solid #262626; border-right: 1px solid #262626;">
             <sc-for list="{{ posts }}" as="post" hint-placeholder-count="1">
               <a href="#" onClick="{{ post.open }}" data-sweep="1" style="display: grid; grid-template-columns: minmax(0, 220px) minmax(0, 1fr) auto; gap: 2rem; align-items: center; padding: 1.5rem; border-bottom: 1px solid #262626; color: #f0f0f0; background-color: transparent; background-image: linear-gradient(#f0f0f0, #f0f0f0); background-repeat: no-repeat; background-size: 0% 100%; background-position: right center; transition: background-size 0.38s cubic-bezier(0.76, 0, 0.24, 1), color 0.25s ease;">
-                <img src="{{ post.cover }}" alt="" style="display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: cover; filter: grayscale(1);"></img>
+                <img src="{{ post.cover }}" alt="" class="sweep-img" style="display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: cover;"></img>
                 <div style="display: flex; flex-direction: column; gap: 0.7rem;">
                   <span style="font-family: ui-monospace, Menlo, monospace; font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; opacity: 0.7;">{{ post.date }}</span>
                   <span style="font-family: 'Roman', serif; font-size: 1.6rem; line-height: 1.15;">{{ post.title }}</span>
@@ -570,7 +571,7 @@ class Component extends DCLogic {
       back: goPath(path.slice(0, -1)),
       trail: chain.slice(0, -1).map((n, depth) => ({ title: n.title, go: goPath(path.slice(0, depth)) })),
       hasChildren: !!cur.children, hasPhotos: !!(cur.photos && cur.photos.length), empty: photoCount(cur) === 0 && !cur.children,
-      cols: cur.children ? Math.min(cur.children.length, 3) : 3,
+      listTop: path.length ? '1px solid #262626' : '0',
       photos: cur.photos || [],
       children: (cur.children || []).map((c, i) => {
         const f = firstPhoto(c);
