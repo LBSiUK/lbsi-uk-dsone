@@ -39,6 +39,10 @@ body { overflow-x: clip; }
 /* Thumbnails inside sweep rows turn from black and white to colour with the hover fill. */
 .sweep-img { filter: grayscale(1); transition: filter 0.38s cubic-bezier(0.76, 0, 0.24, 1); }
 [data-sweep]:hover .sweep-img { filter: grayscale(0); }
+.nav-gh { display: flex; align-items: center; gap: 0.6rem; padding: 0 1.9rem; border-left: 1px solid #333333; background: #f0f0f0; color: #000000; font-size: 0.72rem; letter-spacing: 0.16em; text-transform: uppercase; font-weight: 600; transition: background 0.25s ease; }
+.nav-gh:hover { background: #ffffff; color: #000000; }
+.nav-gh svg { width: 9px; height: 9px; fill: none; stroke: currentColor; stroke-width: 1.4; transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); }
+.nav-gh:hover svg { transform: translate(2px, -2px); }
 .album-grid { columns: 3 300px; column-gap: 0; border-left: 1px solid #262626; border-top: 1px solid #262626; }
 .photo-tile { position: relative; margin: 0; break-inside: avoid; overflow: hidden; border-right: 1px solid #262626; border-bottom: 1px solid #262626; }
 .photo-tile picture, .photo-tile img { display: block; width: 100%; height: auto; }
@@ -80,6 +84,7 @@ body { overflow-x: clip; }
           <span>{{ item.label }}</span>
         </a>
       </sc-for>
+      <a href="https://github.com/LBSiUK" target="_blank" rel="noopener" class="intro-drop nav-gh" style="--d: 470;"><span>Github projects</span><svg viewBox="0 0 10 10" aria-hidden="true"><polyline points="1.5,8.5 8.5,1.5"></polyline><polyline points="3,1.5 8.5,1.5 8.5,7"></polyline></svg></a>
     </nav>
   </header>
 
@@ -443,7 +448,7 @@ class Component extends DCLogic {
     const page = this.state.page;
     const shown = page;
     const trans = this.state.instant ? 'none' : 'background-size 0.38s cubic-bezier(0.76, 0, 0.24, 1), color 0.25s ease';
-    const pages = [['home', 'Home'], ['about', 'About'], ['projects', 'Projects'], ['photos', 'Photos'], ['blog', 'Blogs'], ['contact', 'Contact']];
+    const pages = [['home', 'Home'], ['about', 'About'], ['photos', 'Photos'], ['blog', 'Blogs'], ['contact', 'Contact']];
     const nav = pages.map(([id, label], i) => {
       const active = shown === id;
       return {
