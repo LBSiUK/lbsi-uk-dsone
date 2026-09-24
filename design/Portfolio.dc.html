@@ -69,7 +69,7 @@ body { overflow-x: clip; }
 .photos-viewport { position: relative; overflow: hidden; }
 .photos-stage { position: relative; background: #000000; }
 .photos-snap { position: absolute; top: 0; left: 0; width: 100%; background: #000000; pointer-events: none; }
-.photos-shade { position: absolute; inset: 0; background: rgba(0, 0, 0, 0.72); pointer-events: none; }
+.photos-shade { position: absolute; inset: 0; background: rgba(0, 0, 0, 0.9); pointer-events: none; }
 .is-sliding .page-title { animation: none; }
 .album-wrap { container-type: inline-size; border-left: 1px solid #262626; border-top: 1px solid #262626; }
 /* Fixed 4:3 cells sized from the container width, so the layout is set before any image loads.
@@ -475,7 +475,7 @@ class Component extends DCLogic {
         anims = [
           stage.animate([{ transform: 'translateX(100%)' }, { transform: 'translateX(0)' }], opts),
           snap.animate([{ transform: 'translateX(0)' }, { transform: 'translateX(-25%)' }], opts),
-          shade.animate([{ opacity: 0 }, { opacity: 1 }], opts),
+          shade.animate([{ opacity: 0 }, { opacity: 0.6, offset: 0.55 }, { opacity: 1 }], opts),
         ];
       } else {
         stage.style.zIndex = 0; shade.style.zIndex = 1; snap.style.zIndex = 2;
@@ -483,7 +483,7 @@ class Component extends DCLogic {
         anims = [
           snap.animate([{ transform: 'translateX(0)' }, { transform: 'translateX(100%)' }], opts),
           stage.animate([{ transform: 'translateX(-25%)' }, { transform: 'translateX(0)' }], opts),
-          shade.animate([{ opacity: 1 }, { opacity: 0 }], opts),
+          shade.animate([{ opacity: 1 }, { opacity: 0.6, offset: 0.45 }, { opacity: 0 }], opts),
         ];
       }
       Promise.all(anims.map((a) => a.finished)).then(() => {
