@@ -50,7 +50,7 @@ body { overflow-x: clip; }
     </nav>
   </header>
 
-  <div ref="{{ sweepRef }}" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 200; background: #f0f0f0; pointer-events: none;"></div>
+  <div ref="{{ sweepRef }}" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 200; background: #f0f0f0; pointer-events: none; transform: translateX(-100%);"></div>
 
   <main style="flex: 1; width: 100%; max-width: 1368px; margin: 0 auto; padding: 0 2rem;">
 
@@ -269,9 +269,9 @@ class Component extends DCLogic {
       { transform: 'translateX(-100%)' },
       { transform: 'translateX(0%)', offset: 0.5 },
       { transform: 'translateX(100%)' },
-    ], { duration: 760, easing: 'cubic-bezier(0.76, 0, 0.24, 1)' });
+    ], { duration: 760, easing: 'cubic-bezier(0.76, 0, 0.24, 1)', fill: 'both' });
     setTimeout(() => { this.setState({ page: p, post: null, instant: true }, () => document.querySelectorAll('header [data-sweep]').forEach((n) => { const on = n.dataset.active === '1'; if (n._sw) clearTimeout(n._sw.t); n._sw = { s: 'empty', h: false }; n.style.backgroundSize = on ? '100% 100%' : '0% 100%'; n.style.backgroundPosition = 'right center'; n.style.color = on ? '#000000' : '#f0f0f0'; })); window.scrollTo(0, 0); }, 380);
-    a.onfinish = () => { el.style.display = 'none'; this.busy = false; this.setState({ instant: false }); };
+    a.onfinish = () => { el.style.display = 'none'; a.cancel(); this.busy = false; this.setState({ instant: false }); };
   };
   componentDidMount() {
     const D = 380;
