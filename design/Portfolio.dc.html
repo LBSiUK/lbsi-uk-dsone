@@ -22,7 +22,9 @@ body { overflow-x: clip; }
 .roll-item picture, .roll-item img { display: block; height: 100%; width: auto; }
 .roll-item img { filter: grayscale(0) blur(0); transform: scale(1.02); transition: filter 0.9s ease, transform 0.9s ease; }
 .roll-item:hover img { filter: grayscale(1) blur(6px); transform: scale(1.06); }
-.roll-item figcaption { position: absolute; left: 0; right: 0; bottom: 0; display: flex; flex-direction: column; gap: 0.35rem; padding: 1.4rem 1.5rem; font-family: ui-monospace, Menlo, monospace; font-size: 0.72rem; letter-spacing: 0.08em; color: #f0f0f0; background: linear-gradient(transparent, rgba(0, 0, 0, 0.7)); opacity: 0; transform: translateY(8px); transition: opacity 0.6s ease 0.15s, transform 0.6s ease 0.15s; pointer-events: none; }
+.roll-item figcaption { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: space-between; padding: 1.4rem 1.5rem; color: #f0f0f0; background: linear-gradient(rgba(0, 0, 0, 0.55), transparent 32%, transparent 62%, rgba(0, 0, 0, 0.7)); opacity: 0; transform: translateY(8px); transition: opacity 0.6s ease 0.15s, transform 0.6s ease 0.15s; pointer-events: none; }
+.roll-title { font-size: 1.1rem; line-height: 1.35; }
+.roll-meta { margin-top: auto; display: flex; flex-direction: column; gap: 0.3rem; font-size: 0.85rem; line-height: 1.4; }
 .roll-item:hover figcaption { opacity: 1; transform: translateY(0); }
 .roll-nav { position: absolute; top: 0; bottom: 0; z-index: 2; width: clamp(90px, 11vw, 160px); display: flex; align-items: center; padding: 0 1.75rem; border: 0; cursor: pointer; color: #f0f0f0; opacity: 0; transition: opacity 0.45s ease; }
 .roll-prev { left: 0; justify-content: flex-start; background: linear-gradient(to right, rgba(0, 0, 0, 0.8), transparent); }
@@ -62,9 +64,12 @@ body { overflow-x: clip; }
                 <img src="{{ ph.jpg }}" alt="{{ ph.alt }}" width="{{ ph.w }}" height="1000" loading="eager" decoding="async"></img>
               </picture>
               <figcaption>
-                <span>Taken on: {{ ph.camera }}</span>
-                <span>When: {{ ph.when }}</span>
-                <span>Where: {{ ph.where }}</span>
+                <sc-if value="{{ ph.title }}" hint-placeholder-val="{{ true }}"><span class="roll-title">{{ ph.title }}</span></sc-if>
+                <span class="roll-meta">
+                  <span>Taken on: {{ ph.camera }}</span>
+                  <span>When: {{ ph.when }}</span>
+                  <span>Where: {{ ph.where }}</span>
+                </span>
               </figcaption>
             </figure>
           </sc-for>
@@ -337,14 +342,14 @@ class Component extends DCLogic {
     ].map((p) => ({ ...p, noImg: !p.img, bg: p.img ? `url("${p.img}")` : 'repeating-linear-gradient(135deg, #141414 0 8px, #0e0e0e 8px 16px)', bgSize: p.img ? 'cover' : 'auto' }));
     const photos = [
       ['7121', 'A springer spaniel curled up on the sofa', '28 October 2025', 'NW London, UK'],
-      ['0798', 'Sunset over the Seven Sisters chalk cliffs', '20 March 2026', 'Birling Gap, East Sussex, UK'],
-      ['0365', 'Two dogs lounging on a grey sofa', '18 December 2025', 'NW London, UK'],
+      ['0798', 'Sunset over the Seven Sisters chalk cliffs', '20 March 2026', 'Birling Gap, East Sussex, UK', 'The Seven Sisters'],
+      ['0365', 'Nimrod and Jarvis, two dogs lounging on a grey sofa', '18 December 2025', 'NW London, UK', 'Nimrod \u{1F3BE} and Jarvis \u{1F43E}'],
       ['1802', 'Grand Harbour seen from the walls of Valletta', '23 June 2026', 'Valletta, Malta'],
       ['1933', 'Swimmers in the sea at St Peter\u2019s Pool', '28 June 2026', 'St Peter\u2019s Pool, Marsaxlokk, Malta'],
-      ['2133', 'A band on a blue-lit stage in a packed venue', '23 July 2026', 'Shoreditch, London, UK'],
-      ['2231', 'Hazy golden sky over mountain ridges', '15 August 2026', 'Lake Garda, Italy'],
+      ['2133', 'A band on a blue-lit stage in a packed venue', '23 July 2026', 'Shoreditch, London, UK', 'Live music gig'],
+      ['2231', 'Hazy golden sky over mountain ridges', '15 August 2026', 'Lake Garda, Italy', 'Clouds on flight to Verona'],
       ['2301', 'Alpacas and llamas under a wooden shelter', '20 August 2026', 'Stresa, Lake Maggiore, Italy'],
-    ].map(([id, alt, when, where]) => ({ webp: `images/hero/photo-${id}.webp`, jpg: `images/hero/photo-${id}.jpg`, w: id === '2231' ? 750 : 1333, alt, when, where, camera: 'iPhone 15 Pro Max' }));
+    ].map(([id, alt, when, where, title = '']) => ({ title, webp: `images/hero/photo-${id}.webp`, jpg: `images/hero/photo-${id}.jpg`, w: id === '2231' ? 750 : 1333, alt, when, where, camera: 'iPhone 15 Pro Max' }));
     // Rendered twice so the roll can loop seamlessly.
     const heroPhotos = [...photos.map((p) => ({ ...p, dupe: 'false' })), ...photos.map((p) => ({ ...p, alt: '', dupe: 'true' }))];
     const P = (text) => ({ isP: true, text });
