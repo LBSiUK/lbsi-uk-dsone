@@ -196,51 +196,59 @@ body { overflow-x: clip; }
     <sc-if value="{{ isPhotos }}" hint-placeholder-val="{{ false }}">
       <section style="padding: 4rem 0 5rem;">
         <h2 class="page-title" style="font-family: 'Roman', serif; font-weight: normal; font-size: clamp(2.2rem, 5vw, 3.8rem); line-height: 1.08; padding-bottom: 2rem; border-bottom: 1px solid #262626;">Photos</h2>
-        <sc-if value="{{ albumIndex }}" hint-placeholder-val="{{ true }}">
-          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(max(300px, calc((100% - 1px) / 2)), 1fr)); border-left: 1px solid #262626;">
-            <sc-for list="{{ albums }}" as="al" hint-placeholder-count="2">
+        <sc-if value="{{ node.isChild }}" hint-placeholder-val="{{ false }}">
+          <div style="display: flex; align-items: stretch; border: 1px solid #262626; border-top: 0;">
+            <a href="#" onClick="{{ node.back }}" data-sweep="1" style="display: flex; align-items: center; padding: 1rem 1.5rem; border-right: 1px solid #262626; font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; font-weight: 600; white-space: nowrap; color: #f0f0f0; background-color: transparent; background-image: linear-gradient(#f0f0f0, #f0f0f0); background-repeat: no-repeat; background-size: 0% 100%; background-position: right center; transition: background-size 0.38s cubic-bezier(0.76, 0, 0.24, 1), color 0.25s ease;">&larr; Back</a>
+            <span style="display: flex; align-items: center; flex-wrap: wrap; gap: 0.2rem 0.6rem; padding: 1rem 1.5rem; font-size: 0.85rem; color: #8a8a8a; min-width: 0;">
+              <sc-for list="{{ node.trail }}" as="cr" hint-placeholder-count="2">
+                <a href="#" onClick="{{ cr.go }}" style="color: #8a8a8a; text-decoration: underline; text-underline-offset: 3px;" style-hover="color: #f0f0f0;">{{ cr.title }}</a><span style="color: #555555;">/</span>
+              </sc-for>
+              <span style="color: #f0f0f0;">{{ node.title }}</span>
+            </span>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 0.5rem 2rem; padding: 3rem 0 2rem;">
+            <h1 class="page-title" style="font-family: 'Roman', serif; font-weight: normal; font-size: clamp(2rem, 4vw, 3rem); line-height: 1.1;">{{ node.title }}</h1>
+            <span class="page-title" style="font-size: 0.95rem; color: #8a8a8a;">{{ node.label }}</span>
+          </div>
+        </sc-if>
+        <sc-if value="{{ node.hasChildren }}" hint-placeholder-val="{{ true }}">
+          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(max(280px, calc((100% - 1px) / {{ node.cols }})), 1fr)); border-left: 1px solid #262626; border-top: 1px solid #262626;">
+            <sc-for list="{{ node.children }}" as="al" hint-placeholder-count="2">
               <a href="#" onClick="{{ al.open }}" data-sweep="1" data-reveal="1" style="display: flex; flex-direction: column; gap: 1.5rem; padding: 1.5rem; border-right: 1px solid #262626; border-bottom: 1px solid #262626; color: #f0f0f0; background-color: transparent; background-image: linear-gradient(#f0f0f0, #f0f0f0); background-repeat: no-repeat; background-size: 0% 100%; background-position: right center; transition: background-size 0.38s cubic-bezier(0.76, 0, 0.24, 1), color 0.25s ease;">
                 <div style="aspect-ratio: 16 / 9; background-color: #0e0e0e; background-image: {{ al.bg }}; background-size: cover; background-position: center; filter: grayscale(1);"></div>
                 <div style="display: flex; justify-content: space-between; align-items: flex-end; gap: 1.5rem;">
                   <div style="display: flex; flex-direction: column; gap: 0.6rem;">
                     <span style="font-family: 'Roman', serif; font-size: 1.8rem; line-height: 1.15;">{{ al.title }}</span>
-                    <span style="font-size: 0.9rem; opacity: 0.7;">{{ al.countLabel }}</span>
+                    <span style="font-size: 0.9rem; opacity: 0.7;">{{ al.label }}</span>
                   </div>
-                  <span style="font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; font-weight: 600; white-space: nowrap;">Open album &rarr;</span>
+                  <span style="font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; font-weight: 600; white-space: nowrap;">Open &rarr;</span>
                 </div>
               </a>
             </sc-for>
           </div>
         </sc-if>
-        <sc-if value="{{ albumOpen }}" hint-placeholder-val="{{ false }}">
-          <div style="display: flex; justify-content: space-between; align-items: stretch; border: 1px solid #262626; border-top: 0;">
-            <a href="#" onClick="{{ closeAlbum }}" data-sweep="1" style="display: flex; align-items: center; padding: 1rem 1.5rem; border-right: 1px solid #262626; font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; font-weight: 600; color: #f0f0f0; background-color: transparent; background-image: linear-gradient(#f0f0f0, #f0f0f0); background-repeat: no-repeat; background-size: 0% 100%; background-position: right center; transition: background-size 0.38s cubic-bezier(0.76, 0, 0.24, 1), color 0.25s ease;">&larr; All albums</a>
-            <span style="display: flex; align-items: center; padding: 1rem 1.5rem; font-size: 0.85rem; color: #8a8a8a;">{{ album.countLabel }}</span>
+        <sc-if value="{{ node.hasPhotos }}" hint-placeholder-val="{{ false }}">
+          <div class="album-grid">
+            <sc-for list="{{ node.photos }}" as="ph" hint-placeholder-count="6">
+              <figure class="photo-tile" data-reveal="1">
+                <picture>
+                  <source srcset="{{ ph.webp }}" type="image/webp"></source>
+                  <img src="{{ ph.jpg }}" alt="{{ ph.alt }}" width="{{ ph.w }}" height="1000" loading="lazy" decoding="async"></img>
+                </picture>
+                <figcaption>
+                  <sc-if value="{{ ph.title }}" hint-placeholder-val="{{ true }}"><span class="roll-title">{{ ph.title }}</span></sc-if>
+                  <span class="roll-meta">
+                    <span>Taken on: {{ ph.camera }}</span>
+                    <sc-if value="{{ ph.when }}" hint-placeholder-val="{{ true }}"><span>When: {{ ph.when }}</span></sc-if>
+                    <span>Where: {{ ph.where }}</span>
+                  </span>
+                </figcaption>
+              </figure>
+            </sc-for>
           </div>
-          <h1 class="page-title" style="font-family: 'Roman', serif; font-weight: normal; font-size: clamp(2rem, 4vw, 3rem); line-height: 1.1; padding: 3rem 0 2rem;">{{ album.title }}</h1>
-          <sc-if value="{{ album.hasPhotos }}" hint-placeholder-val="{{ true }}">
-            <div class="album-grid">
-              <sc-for list="{{ album.photos }}" as="ph" hint-placeholder-count="6">
-                <figure class="photo-tile" data-reveal="1">
-                  <picture>
-                    <source srcset="{{ ph.webp }}" type="image/webp"></source>
-                    <img src="{{ ph.jpg }}" alt="{{ ph.alt }}" width="{{ ph.w }}" height="1000" loading="lazy" decoding="async"></img>
-                  </picture>
-                  <figcaption>
-                    <sc-if value="{{ ph.title }}" hint-placeholder-val="{{ true }}"><span class="roll-title">{{ ph.title }}</span></sc-if>
-                    <span class="roll-meta">
-                      <span>Taken on: {{ ph.camera }}</span>
-                      <span>When: {{ ph.when }}</span>
-                      <span>Where: {{ ph.where }}</span>
-                    </span>
-                  </figcaption>
-                </figure>
-              </sc-for>
-            </div>
-          </sc-if>
-          <sc-if value="{{ album.empty }}" hint-placeholder-val="{{ false }}">
-            <p data-reveal="1" style="padding: 3rem 1.5rem; border: 1px solid #262626; color: #8a8a8a; font-size: 1.05rem;">Nothing here yet &mdash; check back soon.</p>
-          </sc-if>
+        </sc-if>
+        <sc-if value="{{ node.empty }}" hint-placeholder-val="{{ false }}">
+          <p data-reveal="1" style="padding: 3rem 1.5rem; border: 1px solid #262626; color: #8a8a8a; font-size: 1.05rem;">Nothing here yet &mdash; check back soon.</p>
         </sc-if>
       </section>
     </sc-if>
@@ -318,7 +326,7 @@ body { overflow-x: clip; }
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props="{}">
 class Component extends DCLogic {
-  state = { page: 'home', intro: 'wait' };
+  state = { page: 'home', intro: 'wait', path: [] };
   order = ['home', 'about', 'projects', 'photos', 'blog', 'contact'];
   sweepRef = React.createRef();
   rollRef = React.createRef();
@@ -354,7 +362,7 @@ class Component extends DCLogic {
       { transform: 'translateX(0%)', offset: 0.5 },
       { transform: 'translateX(100%)' },
     ], { duration: 760, easing: 'cubic-bezier(0.76, 0, 0.24, 1)', fill: 'both' });
-    setTimeout(() => { this.setState({ page: p, post: null, album: null, instant: true }, () => document.querySelectorAll('header [data-sweep]').forEach((n) => { const on = n.dataset.active === '1'; if (n._sw) clearTimeout(n._sw.t); n._sw = { s: 'empty', h: false }; n.style.backgroundSize = on ? '100% 100%' : '0% 100%'; n.style.backgroundPosition = 'right center'; n.style.color = on ? '#000000' : '#f0f0f0'; })); window.scrollTo(0, 0); }, 380);
+    setTimeout(() => { this.setState({ page: p, post: null, path: [], instant: true }, () => document.querySelectorAll('header [data-sweep]').forEach((n) => { const on = n.dataset.active === '1'; if (n._sw) clearTimeout(n._sw.t); n._sw = { s: 'empty', h: false }; n.style.backgroundSize = on ? '100% 100%' : '0% 100%'; n.style.backgroundPosition = 'right center'; n.style.color = on ? '#000000' : '#f0f0f0'; })); window.scrollTo(0, 0); }, 380);
     a.onfinish = () => { el.style.display = 'none'; a.cancel(); this.busy = false; this.setState({ instant: false }); };
   };
   componentDidMount() {
@@ -469,20 +477,111 @@ class Component extends DCLogic {
     ].map(([id, alt, when, where, title = '']) => ({ title, webp: `images/hero/photo-${id}.webp`, jpg: `images/hero/photo-${id}.jpg`, w: id === '2231' ? 750 : 1333, alt, when, where, camera: 'iPhone 15 Pro Max' }));
     // Rendered twice so the roll can loop seamlessly.
     const heroPhotos = [...photos.map((p, i) => ({ ...p, dupe: 'false', d: 150 + i * 110 })), ...photos.map((p, i) => ({ ...p, alt: '', dupe: 'true', d: 150 + (i + 8) * 110 }))];
-    const count = (n) => (n === 1 ? '1 photo' : n + ' photos');
-    const albums = [
+    // Photos: a tree of albums. A node has either children (sub-albums) or photos.
+    const IPOD = 'iPod Touch 5th Generation';
+    const ipodAlbum = (slug, title, date, rows) => ({
+      title, date,
+      photos: rows.map(([id, w, when, where]) => ({
+        webp: `images/albums/ipod-touch-5/${slug}/${id}.webp`, jpg: `images/albums/ipod-touch-5/${slug}/${id}.jpg`,
+        w, when, where, camera: IPOD, title: '', alt: `${title}, taken on an ${IPOD}`,
+      })),
+    });
+    const tree = { title: 'Photos', children: [
       { title: 'Things I take to look nice', photos },
-      { title: 'Photos from \u2018interesting\u2019 cameras', photos: [] },
-    ].map((a, i) => ({
-      ...a, countLabel: a.photos.length ? count(a.photos.length) : 'Coming soon',
-      hasPhotos: a.photos.length > 0, empty: a.photos.length === 0,
-      bg: a.photos.length ? `url("${a.photos[0].jpg}")` : 'repeating-linear-gradient(135deg, #141414 0 8px, #0e0e0e 8px 16px)',
-      open: (e) => { e.preventDefault(); this.setState({ album: i }); window.scrollTo(0, 0); },
-    }));
+      { title: 'Photos from \u2018interesting\u2019 cameras', children: [
+        { title: IPOD, children: [
+      ipodAlbum('sussex-downs', 'Sussex Downs', 'April 2026', [
+          ['img-0012', 1339, '23 April 2026', 'Sussex Downs, UK'],
+          ['img-0013', 1339, '23 April 2026', 'Sussex Downs, UK'],
+          ['img-0017', 747, '23 April 2026', 'Sussex Downs, UK'],
+          ['img-0029', 1339, '23 April 2026', 'Sussex Downs, UK'],
+          ['img-0126', 1339, '', 'Sussex Downs, UK'],
+        ]),
+      ipodAlbum('shoreham-beach', 'Shoreham Beach', 'April 2026', [
+          ['img-0039', 1339, '25 April 2026', 'Shoreham Beach, West Sussex, UK'],
+          ['img-0049', 1339, '25 April 2026', 'Shoreham Beach, West Sussex, UK'],
+          ['img-0054', 1339, '25 April 2026', 'Shoreham Beach, West Sussex, UK'],
+          ['img-0058', 1339, '25 April 2026', 'Shoreham Beach, West Sussex, UK'],
+          ['img-0060', 1339, '25 April 2026', 'Shoreham Beach, West Sussex, UK'],
+        ]),
+      ipodAlbum('house-of-fraser', 'House of Fraser (Birmingham)', 'May 2026', [
+          ['img-0128', 1339, '27 May 2026', 'House of Fraser, Birmingham, UK'],
+          ['img-0131', 1339, '27 May 2026', 'House of Fraser, Birmingham, UK'],
+          ['img-0132', 1339, '27 May 2026', 'House of Fraser, Birmingham, UK'],
+          ['img-0135', 747, '27 May 2026', 'House of Fraser, Birmingham, UK'],
+          ['img-0139', 1339, '27 May 2026', 'House of Fraser, Birmingham, UK'],
+          ['img-0141', 1339, '27 May 2026', 'House of Fraser, Birmingham, UK'],
+        ]),
+      ipodAlbum('malta', 'Malta', 'July 2026', [
+          ['img-0153', 1339, 'July 2026', 'Malta'],
+          ['img-0155', 1339, 'July 2026', 'Malta'],
+          ['img-0157', 1339, 'July 2026', 'Malta'],
+          ['img-0165', 1339, 'July 2026', 'Malta'],
+          ['img-0168', 747, 'July 2026', 'Malta'],
+          ['img-0170', 1339, 'July 2026', 'Malta'],
+          ['img-0172', 1339, 'July 2026', 'Malta'],
+          ['img-0186', 1339, 'July 2026', 'Malta'],
+          ['img-0188', 1339, '23 June 2026', 'Valletta, Malta'],
+          ['img-0190', 1339, '23 June 2026', 'Malta'],
+          ['img-0206', 1339, '24 June 2026', 'Malta'],
+          ['img-0208', 1339, '24 June 2026', 'Malta'],
+          ['img-0210', 1339, '24 June 2026', 'Malta'],
+          ['img-0230', 1339, '26 June 2026', 'Birgu, Malta'],
+          ['img-0236', 1339, '26 June 2026', 'Floriana, Malta'],
+          ['img-0238', 1339, '26 June 2026', 'Floriana, Malta'],
+          ['img-0257', 1339, '27 June 2026', 'Malta'],
+          ['img-0267', 1339, '27 June 2026', 'Malta'],
+          ['img-0275', 1339, '29 June 2026', 'Mdina, Malta'],
+        ]),
+      ipodAlbum('central-london', 'Central London', 'July 2026', [
+          ['img-0294', 1339, '4 July 2026', 'Victoria Embankment, London, UK'],
+          ['img-0309', 1339, '5 July 2026', 'Leake Street Tunnel, London, UK'],
+          ['img-0317', 1339, '5 July 2026', 'Leake Street Tunnel, London, UK'],
+          ['img-0321', 1339, '5 July 2026', 'Leake Street Tunnel, London, UK'],
+          ['img-0325', 747, '5 July 2026', 'Leake Street Tunnel, London, UK'],
+          ['img-0328', 1339, '5 July 2026', 'South Bank, London, UK'],
+          ['img-0357', 1339, '21 July 2026', 'Camden, London, UK'],
+          ['img-0372', 1339, '23 July 2026', 'Shoreditch, London, UK'],
+          ['img-0380', 1339, '23 July 2026', 'Shoreditch, London, UK'],
+        ]),
+      ipodAlbum('brighton', 'Brighton General', 'July 2026', [
+          ['img-0399', 1339, '27 July 2026', 'Brighton, UK'],
+          ['img-0401', 1339, '27 July 2026', 'Brighton, UK'],
+          ['img-0406', 1339, '27 July 2026', 'Brighton, UK'],
+        ]),
+        ] },
+      ] },
+    ] };
+    const photoCount = (n) => (n.photos ? n.photos.length : (n.children || []).reduce((t, c) => t + photoCount(c), 0));
+    const firstPhoto = (n) => (n.photos ? n.photos[0] : (n.children || []).map(firstPhoto).find(Boolean));
+    const plural = (k, word) => `${k} ${word}${k === 1 ? '' : 's'}`;
+    const describe = (n) => {
+      const k = photoCount(n);
+      const bits = [n.date, n.children ? plural(n.children.length, 'album') : null, k ? plural(k, 'photo') : 'Coming soon'];
+      return bits.filter(Boolean).join(' \u00b7 ');
+    };
+    const goPath = (path) => (e) => { e.preventDefault(); this.setState({ path }); window.scrollTo(0, 0); };
+    const path = this.state.path || [];
+    const chain = [tree];
+    path.forEach((i) => chain.push(chain[chain.length - 1].children[i]));
+    const cur = chain[chain.length - 1];
+    const node = {
+      title: cur.title, label: describe(cur), isChild: path.length > 0,
+      back: goPath(path.slice(0, -1)),
+      trail: chain.slice(0, -1).map((n, depth) => ({ title: n.title, go: goPath(path.slice(0, depth)) })),
+      hasChildren: !!cur.children, hasPhotos: !!(cur.photos && cur.photos.length), empty: photoCount(cur) === 0 && !cur.children,
+      cols: cur.children ? Math.min(cur.children.length, 3) : 3,
+      photos: cur.photos || [],
+      children: (cur.children || []).map((c, i) => {
+        const f = firstPhoto(c);
+        return { title: c.title, label: describe(c), open: goPath([...path, i]),
+          bg: f ? `url("${f.jpg}")` : 'repeating-linear-gradient(135deg, #141414 0 8px, #0e0e0e 8px 16px)' };
+      }),
+    };
     const P = (text) => ({ isP: true, text });
     const posts = [{
       title: "We've got a new site! (again)",
-      date: '24 September 2026, 00:45',
+      date: '24 September 2026',
       cover: 'images/blog-2.png',
       lede: 'University has been a wild ride.',
       blocks: [
@@ -511,8 +610,7 @@ class Component extends DCLogic {
       nav, featured, projects, contacts, heroPhotos, intro: this.state.intro,
       chips: ['Windows / AD', 'Linux / SSH', 'macOS', 'Python', 'Java', 'PowerShell', 'Electronics Repair', 'Arduino'],
       isHome: page === 'home', isAbout: page === 'about', isProjects: page === 'projects', isContact: page === 'contact', isBlog: page === 'blog', isPhotos: page === 'photos',
-      albums, albumIndex: this.state.album == null, albumOpen: this.state.album != null, album: albums[this.state.album ?? 0],
-      closeAlbum: (e) => { e.preventDefault(); this.setState({ album: null }); window.scrollTo(0, 0); },
+      node,
       posts: posts.map((p, i) => ({ ...p, open: (e) => { e.preventDefault(); this.setState({ post: i }); window.scrollTo(0, 0); } })),
       blogIndex: this.state.post == null, blogPost: this.state.post != null,
       post: posts[this.state.post ?? 0],
