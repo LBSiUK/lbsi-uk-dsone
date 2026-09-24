@@ -69,7 +69,7 @@ body { overflow-x: clip; }
 .photos-viewport { position: relative; overflow: hidden; }
 .photos-stage { position: relative; background: #000000; }
 .photos-snap { position: absolute; top: 0; left: 0; width: 100%; background: #000000; pointer-events: none; }
-.photos-shade { position: absolute; inset: 0; background: rgba(0, 0, 0, 0.9); pointer-events: none; }
+.photos-shade { position: absolute; inset: 0; background: #000000; pointer-events: none; }
 .is-sliding .page-title { animation: none; }
 .album-wrap { container-type: inline-size; border-left: 1px solid #262626; border-top: 1px solid #262626; }
 /* Fixed 4:3 cells sized from the container width, so the layout is set before any image loads.
@@ -466,8 +466,12 @@ class Component extends DCLogic {
         return [n, t];
       });
       requestAnimationFrame(() => rows.forEach(([n, t]) => { n.style.transition = t; }));
-      box.style.height = Math.max(oldH, stage.offsetHeight) + 'px';
+      const newH = stage.offsetHeight;
       const opts = { duration: 560, easing: 'cubic-bezier(0.32, 0.72, 0, 1)', fill: 'both' };
+      // Keep both layers composited for the whole slide so nothing re-rasterises at the end.
+      stage.style.willChange = snap.style.willChange = 'transform';
+      // Ease the height between levels so the footer glides rather than jumping at the end.
+      const grow = box.animate([{ height: oldH + 'px' }, { height: newH + 'px' }], opts);
       let anims;
       if (dir > 0) {
         snap.style.zIndex = 0; shade.style.zIndex = 1; stage.style.zIndex = 2;
@@ -486,10 +490,11 @@ class Component extends DCLogic {
           shade.animate([{ opacity: 1 }, { opacity: 0.6, offset: 0.45 }, { opacity: 0 }], opts),
         ];
       }
+      anims.push(grow);
       Promise.all(anims.map((a) => a.finished)).then(() => {
         anims.forEach((a) => a.cancel());
         snap.remove(); shade.remove();
-        box.style.height = ''; stage.style.zIndex = '';
+        stage.style.zIndex = ''; stage.style.willChange = '';
         stage.classList.remove('is-sliding');
         stage.querySelectorAll('[data-reveal]').forEach((n) => { n.style.transition = ''; });
         this.sliding = false;
